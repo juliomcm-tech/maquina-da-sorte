@@ -273,6 +273,7 @@ table.tbl{width:100%;border-collapse:collapse;font-size:13.5px;font-variant-nume
 .status b{color:var(--ink)}
 .note{font-size:13px;color:var(--muted);padding:14px;border:1.5px dashed var(--line);border-radius:14px}
 form.manual{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+#socMembers{flex:1 1 100%;display:flex;flex-direction:column;gap:8px}.socrow{display:flex;gap:8px;align-items:center}.socrow input{flex:1 1 auto}.socrow input.pc{flex:0 0 76px;text-align:center}.socrow button{flex:0 0 auto;width:36px;height:36px;border-radius:12px;border:1.5px solid var(--line);background:transparent;color:var(--muted);font:inherit;font-size:18px;cursor:pointer}.soclbl{font-size:12px;color:var(--muted);font-weight:600;flex:1 1 100%}
 form.manual label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);font-weight:600;flex:1 1 150px;min-width:0}
 form.manual input{font:inherit;font-size:14px;padding:8px 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--glass);color:var(--ink);width:100%;font-family:var(--mono)}
 .err{color:var(--accent);font-size:12.5px;width:100%}
@@ -798,8 +799,9 @@ html[data-skin="branco"] .tbl th,html[data-skin="branco"] .tbl td{border-bottom-
           <h3>Limite e sociedade</h3>
           <form class="manual" id="setForm" novalidate>
             <label for="sLimit">Limite por mês (€)<input id="sLimit" inputmode="decimal" autocomplete="off" placeholder="ex.: 20"></label>
-            <label for="sPartner">Sociedade com<input id="sPartner" autocomplete="off" placeholder="nome"></label>
-            <label for="sSplit">Parte dele(a) (%)<input id="sSplit" inputmode="numeric" autocomplete="off" placeholder="50"></label>
+            <span class="soclbl">Sociedade: as outras pessoas e a parte de cada uma. Deixa a % vazia para dividir em partes iguais.</span>
+            <div id="socMembers"></div>
+            <button type="button" class="btn" id="socAdd">+ Adicionar pessoa</button>
             <button type="submit" class="btn primary">Guardar</button>
           </form>
           <p>Para pôr uma chave em sociedade, toca no ícone das duas pessoas ao lado dela, em "As tuas chaves".</p>
@@ -841,6 +843,10 @@ html[data-skin="branco"] .tbl th,html[data-skin="branco"] .tbl td{border-bottom-
         <div class="ev" id="ev"></div>
         <div class="head" style="margin:18px 0 4px"><div><h1 style="font-size:22px">Hipótese pré-registada: o ritmo do 13</h1><p>Encontrei um ritmo de 4,47 sorteios no número 13, mas só ao olhar para a história inteira. Fica registado hoje, 05/11/2026, e é julgado apenas com os sorteios que ainda não aconteceram.</p></div></div>
         <div id="hyp"></div>
+        <div class="head" style="margin:22px 0 4px"><div><h1 style="font-size:22px">Duelo ao vivo</h1><p>Desde 05/11/2026, antes de cada sorteio a app gera em segredo uma chave Einstein, uma ao acaso e uma de quentes, só com os sorteios anteriores. Depois confere-as. É o placar real, sem batota, e cresce sozinho.</p></div></div>
+        <div id="live"></div>
+        <div class="head" style="margin:22px 0 4px"><div><h1 style="font-size:22px">O que a app já aprendeu</h1><p>A única coisa que dá para aprender: que chaves o público joga mais. Compara os vencedores reais de cada escalão com o esperado e, com dados suficientes, afina a anti-partilha do Einstein.</p></div></div>
+        <div id="learn"></div>
       </section>
 
       <div class="artists" id="tendencias">
@@ -1151,9 +1157,9 @@ function smartKey(g,hist,r,seen,locks=[],used=null,usedB=null){const G=GAMES[g],
   const exB=usedB&&usedB.size&&G.B-usedB.size>=G.kb?usedB:null;
   let b,lb=ctx.last?ctx.last.b.join(','):'';for(let t=0;t<50;t++){b=sampleU(G.B,G.kb,r,[],exB);if(G.kb===1||b.join(',')!==lb)break}
   return {n:key,b,ok}}
-function shareIndex(g,n,b){ // estimativa de quanta gente joga uma chave parecida (0 = rara, 100 = muito jogada)
-  const G=GAMES[g],last=DRAWS[g][DRAWS[g].length-1];let s=0;
-  s+=n.filter(x=>x<=31).length*9;s+=n.filter(x=>x<=12).length*4;
+function shareIndex(g,n,b,lastD){ // estimativa de quanta gente joga uma chave parecida (0 = rara, 100 = muito jogada)
+  const G=GAMES[g],last=lastD||DRAWS[g][DRAWS[g].length-1];let s=0;
+  s+=n.filter(x=>x<=31).length*9*(typeof learnedFactor==='function'?learnedFactor(g):1);s+=n.filter(x=>x<=12).length*4;
   for(let i=1;i<n.length;i++)if(n[i]-n[i-1]===1)s+=10;
   const d=n.slice(1).map((x,i)=>x-n[i]);if(d.every(x=>x===d[0]))s+=30;
   const ld={};n.forEach(x=>{ld[x%10]=(ld[x%10]||0)+1});if(Math.max(...Object.values(ld))>=3)s+=10;
@@ -1164,7 +1170,7 @@ const shareLbl=v=>v<30?'partilha baixa':v<55?'partilha média':'partilha alta';
 function einsteinKey(g,hist,r,seen,locks=[],used=null,usedB=null){ // cobertura elástica + mínima popularidade
   const G=GAMES[g],ctx=smartCtx(g,hist);let best=null,got=0;
   for(let t=0;t<40000;t++){const key=sampleU(G.N,G.k,r,locks);if(!smartOk(g,key,ctx,seen))continue;
-    const ov=used?key.filter(n=>used.has(n)&&!locks.includes(n)).length:0,sc=ov*1000+shareIndex(g,key,[]);
+    const ov=used?key.filter(n=>used.has(n)&&!locks.includes(n)).length:0,sc=ov*1000+shareIndex(g,key,[],ctx.last);
     if(!best||sc<best.sc)best={sc,key};got++;if(got>=300||(got>=80&&best.sc<1000))break}
   const exB=usedB&&usedB.size&&G.B-usedB.size>=G.kb?usedB:null;let b=null,bs=1e9,lb=ctx.last?ctx.last.b.join(','):'';
   for(let t=0;t<12;t++){const c=sampleU(G.B,G.kb,r,[],exB);if(G.kb>1&&c.join(',')===lb)continue;const sc=c.includes(7)?3:0;/* evita o 7, número da sorte popular */if(sc<bs){bs=sc;b=c}}
@@ -1214,7 +1220,7 @@ function renderAll(){
   document.querySelectorAll('#gameNav [data-game]').forEach(a=>a.parentElement.classList.toggle('active',a.dataset.game===S.game));
   $('userGame').textContent=G.label;
   $('periodLbl').textContent=PERIODS.find(p=>p[0]===S.period)[1];
-  renderSlides();renderResults();renderConferir();renderWallet();renderSoc();renderM1();renderFixList();renderSmart();renderLab();renderArtists();renderAlbums();renderSlip();renderPatterns();renderTruth();renderFacts();renderPlayer();renderNow(false);renderSongs();
+  renderSlides();renderResults();renderConferir();renderWallet();renderM1();renderFixList();renderSmart();renderLab();renderArtists();renderAlbums();renderSlip();renderPatterns();renderTruth();renderFacts();renderPlayer();renderNow(false);renderSongs();
   save();
 }
 
@@ -1556,7 +1562,7 @@ function manualResult(e){e.preventDefault();const g=S.game,G=GAMES[g];
   absorb([{g,d,n,b,manual:true,src:'à mão'}]);saveRes();renderAll();$('rNums').value='';$('rBon').value='';toast('Resultado guardado. As tuas chaves já foram conferidas.');
 }
 function exportBackup(){
-  const data={app:'maquina-da-sorte',v:2,guardado:new Date().toISOString(),chaves:KEYS,fixas:FIXED,m1lhao:M1U,definicoes:{limit:SET.limit,partner:SET.partner,split:SET.split,ntfy:SET.ntfy},resultados:[...Object.values(RES.em),...Object.values(RES.ed)].filter(x=>x.d>=20261001||x.tiers||x.manual)};
+  const data={app:'maquina-da-sorte',v:2,guardado:new Date().toISOString(),chaves:KEYS,fixas:FIXED,m1lhao:M1U,definicoes:{limit:SET.limit,members:SET.members,ntfy:SET.ntfy},resultados:[...Object.values(RES.em),...Object.values(RES.ed)].filter(x=>x.d>=20261001||x.tiers||x.manual)};
   const blob=new Blob([JSON.stringify(data,null,1)],{type:'application/json'}),a=document.createElement('a');
   a.href=URL.createObjectURL(blob);a.download='maquina-da-sorte-copia-'+ymd(new Date())+'.json';document.body.appendChild(a);a.click();
   setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000);toast('Cópia guardada nas transferências');
@@ -1565,7 +1571,7 @@ function importBackup(file){const fr=new FileReader();fr.onload=()=>{try{const j
     const ids=new Set(KEYS.map(k=>k.id));let n=0;for(const k of j.chaves||[]){if(k&&k.id&&!ids.has(k.id)&&GAMES[k.g]&&validDraw(k.g,k.n,k.b)){KEYS.push(k);n++}}
     if(Array.isArray(j.fixas)){const f=new Set(FIXED.map(x=>x.id));j.fixas.forEach(x=>{if(x&&x.id&&!f.has(x.id))FIXED.push(x)});saveFixed()}
     if(Array.isArray(j.m1lhao)){const f=new Set(M1U.map(x=>x.id));j.m1lhao.forEach(x=>{if(x&&x.id&&!f.has(x.id))M1U.push(x)});saveM1()}
-    if(j.definicoes){Object.assign(SET,j.definicoes);saveSet()}
+    if(j.definicoes){Object.assign(SET,j.definicoes);if(!Array.isArray(SET.members))SET.members=SET.partner?[{name:SET.partner,pct:+SET.split||50}]:[];delete SET.partner;delete SET.split;saveSet()}
     saveLocalKeys();if(Array.isArray(j.resultados))absorb(j.resultados);syncFixed();saveRes();renderAll();toast(`${n} chave${n===1?'':'s'} reposta${n===1?'':'s'}`)}
   catch(e){toast('Esse ficheiro não é uma cópia da Máquina da Sorte')}};fr.readAsText(file)}
 
@@ -1604,7 +1610,13 @@ function manualSubmit(e){e.preventDefault();const g=S.game,G=GAMES[g];
 const SET=(()=>{try{return Object.assign({limit:null,partner:'',split:50,ntfy:'',pin:null},JSON.parse(localStorage.getItem('maquina_set')||'{}'))}catch(e){return {limit:null,partner:'',split:50,ntfy:'',pin:null}}})();
 function saveSet(){try{localStorage.setItem('maquina_set',JSON.stringify(SET))}catch(e){}}
 if(!SET.ntfy){SET.ntfy='maquina-'+Array.from(crypto.getRandomValues(new Uint8Array(9)),b=>'abcdefghijkmnpqrstuvwxyz23456789'[b%32]).join('');saveSet()}
-const myShare=k=>k&&k.soc?Math.max(0,Math.min(1,1-(+SET.split||0)/100)):1;
+if(!Array.isArray(SET.members)){SET.members=SET.partner?[{name:SET.partner,pct:+SET.split||50}]:[];saveSet()}
+const escH=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function socShares(){const L=SET.members.filter(m=>m&&m.name),fixed=L.filter(m=>m.pct!=null&&m.pct!==''),free=L.length-fixed.length+1;
+  const used=Math.min(100,fixed.reduce((a,m)=>a+(+m.pct||0),0)),each=(100-used)/free/100;
+  return {me:each,list:L.map(m=>({name:m.name,share:m.pct!=null&&m.pct!==''?(+m.pct||0)/100:each}))}}
+function socNames(){const n=SET.members.filter(m=>m&&m.name).map(m=>m.name);return n.length<2?(n[0]||''):n.slice(0,-1).join(', ')+' e '+n[n.length-1]}
+const myShare=k=>k&&k.soc?Math.max(0,Math.min(1,socShares().me)):1;
 let FIXED=(()=>{try{return JSON.parse(localStorage.getItem('maquina_fixed')||'[]')}catch(e){return[]}})();
 function saveFixed(){try{localStorage.setItem('maquina_fixed',JSON.stringify(FIXED))}catch(e){}}
 const isFixed=k=>FIXED.some(f=>f.id===k.fid||(f.g===k.g&&f.n.join()===k.n.join()&&f.b.join()===k.b.join()));
@@ -1622,7 +1634,7 @@ function toggleFixed(id){const k=KEYS.find(x=>x.id===id);if(!k)return;
 function renderFixList(){const el=$('fixList');if(!el)return;const g=S.game,l=FIXED.filter(f=>f.g===g);
   el.innerHTML=l.length?l.map(f=>`<div class="li"><span class="mono">${f.n.join(' ')} + ${f.b.join(' ')}</span><span>desde ${shortD(f.from)}${f.soc?' · sociedade':''}</span><button type="button" data-unfix="${f.id}">Deixar de jogar</button></div>`).join(''):'<div class="note">Ainda não tens chaves de sempre no '+GAMES[g].label+'.</div>'}
 function toggleSoc(id){const k=KEYS.find(x=>x.id===id);if(!k)return;k.soc=!k.soc;saveLocalKeys();
-  if(k.soc&&!SET.partner)toast('Em sociedade. Põe o nome e a parte na Carteira.');else toast(k.soc?`Em sociedade com ${SET.partner}`:'Já não está em sociedade');
+  if(k.soc&&!socNames())toast('Em sociedade. Põe as pessoas e as partes na Carteira.');else toast(k.soc?`Em sociedade com ${socNames()}`:'Já não está em sociedade');
   renderSongs();renderConferir();renderWallet()}
 function monthKey(d){return Math.floor(d/100)}
 function walletData(){const M={};
@@ -1640,14 +1652,21 @@ function renderWallet(){
   const mx=Math.max(1,...months.map(k=>Math.max((M[k]||{}).s||0,(M[k]||{}).w||0)));
   $('walletBars').innerHTML=months.map(k=>{const v=M[k]||{s:0,w:0};return `<div class="m" data-tip="<b>${MES[k%100-1]} ${Math.floor(k/100)}</b><br>Gasto ${eur(v.s)}<br>Ganho ${eur(v.w)}"><i class="s" style="height:${v.s/mx*140}px"></i><i class="w" style="height:${v.w/mx*140}px"></i></div>`}).join('');
   $('walletX').innerHTML=months.map((k,i)=>`<span>${i%2===1||i===11?MES[k%100-1]:''}</span>`).join('');
-  $('sLimit').placeholder=SET.limit?String(SET.limit):'ex.: 20';$('sPartner').placeholder=SET.partner||'nome';$('sSplit').placeholder=String(SET.split??50);
+  $('sLimit').placeholder=SET.limit?String(SET.limit):'ex.: 20';renderSocForm();
+  renderSoc();
   $('ntfyTopic').textContent=SET.ntfy;
   $('notifTxt').textContent=('Notification' in window)&&Notification.permission==='granted'?'Avisos ativos neste telemóvel':'Ativar avisos neste telemóvel';
   $('pinSub').textContent=SET.pin?'O PIN está ativo neste telemóvel.':'Pede um PIN ao abrir a app neste telemóvel. Protege as tuas chaves de quem pegar no telemóvel.';
 }
-function saveSettings(e){e.preventDefault();const l=$('sLimit').value.trim(),p=$('sPartner').value.trim(),s=$('sSplit').value.trim();
-  if(l)SET.limit=Math.max(0,parseFloat(l.replace(',','.')))||null;if(p)SET.partner=p.slice(0,40);if(s)SET.split=Math.max(0,Math.min(100,parseInt(s,10)||0));
-  saveSet();['sLimit','sPartner','sSplit'].forEach(i=>$(i).value='');renderWallet();renderConferir();toast('Guardado')}
+function renderSocForm(rows){const L=rows||SET.members;const el=$('socMembers');if(!el)return;
+  el.innerHTML=(L.length?L:[{name:'',pct:null}]).map((m,i)=>`<div class="socrow"><input class="nm" autocomplete="off" maxlength="40" placeholder="nome" aria-label="Nome da pessoa ${i+1}" value="${escH(m.name||'')}"><input class="pc" inputmode="numeric" autocomplete="off" placeholder="%" aria-label="Parte da pessoa ${i+1} em %" value="${m.pct!=null&&m.pct!==''?m.pct:''}"><button type="button" data-socdel="${i}" aria-label="Tirar esta pessoa">×</button></div>`).join('')}
+function readSocForm(){return [...document.querySelectorAll('#socMembers .socrow')].map(r=>{const n=r.querySelector('.nm').value.trim().slice(0,40),p=r.querySelector('.pc').value.trim();return {name:n,pct:p===''?null:Math.max(0,Math.min(100,parseInt(p,10)||0))}})}
+$('socAdd').addEventListener('click',()=>{const L=readSocForm();if(L.length>=9){toast('No máximo 10 pessoas');return}L.push({name:'',pct:null});renderSocForm(L);const r=document.querySelectorAll('#socMembers .nm');r[r.length-1].focus()});
+$('socMembers').addEventListener('click',e=>{const b=e.target.closest('[data-socdel]');if(!b)return;const L=readSocForm();L.splice(+b.dataset.socdel,1);renderSocForm(L)});
+function saveSettings(e){e.preventDefault();const l=$('sLimit').value.trim(),L=readSocForm().filter(m=>m.name);
+  const sum=L.reduce((a,m)=>a+(m.pct||0),0);if(sum>100){toast('As partes somam mais de 100%');return}
+  if(l)SET.limit=Math.max(0,parseFloat(l.replace(',','.')))||null;SET.members=L;delete SET.partner;delete SET.split;
+  saveSet();$('sLimit').value='';renderWallet();renderConferir();const sh=socShares();toast(L.length?`Guardado · a tua parte: ${pct(sh.me)}`:'Guardado')}
 /* M1lhão */
 const normCode=s=>String(s||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
 let M1L=(()=>{try{return JSON.parse(localStorage.getItem('maquina_m1l')||'{}')}catch(e){return{}}})();
@@ -1779,10 +1798,11 @@ applySkin(SKIN);
 /* ---------- resumo da carteira e da sociedade ---------- */
 function socData(){const now=new Date(),cur=now.getFullYear()*100+now.getMonth()+1;let n=0,cost=0,won=0;
   for(const k of KEYS){if(!k.soc||!k.d||Math.floor(k.d/100)!==cur)continue;const G=GAMES[k.g];n++;cost+=G.price;const st=keyStatus(k);if(st.state==='win'&&st.prize!=null)won+=st.prize}
-  const part=Math.max(0,Math.min(100,+SET.split||0))/100;return {n,cost,won,mine:1-part,theirs:part}}
-function renderSoc(){const el=$('socBox');if(!el)return;const s=socData();
-  if(!s.n){el.innerHTML=SET.partner?`<div class="status"><span>Sociedade com <b>${SET.partner}</b>: ainda sem chaves em sociedade este mês.</span></div>`:'';return}
-  el.innerHTML=`<div class="status"><span>Sociedade com <b>${SET.partner||'parceiro(a)'}</b> este mês: ${s.n} chave${s.n===1?'':'s'}, ${eur(s.cost)} no total</span><span>Tu pagas <b>${eur(s.cost*s.mine)}</b> · ${SET.partner||'parceiro(a)'} paga <b>${eur(s.cost*s.theirs)}</b></span><span>Prémios: ${eur(s.won)} (tu ${eur(s.won*s.mine)} · ${SET.partner||'parceiro(a)'} ${eur(s.won*s.theirs)})</span></div>`}
+  const sh=socShares();return {n,cost,won,mine:sh.me,list:sh.list}}
+function renderSoc(){const el=$('socBox');if(!el)return;const s=socData(),who=socNames();
+  if(!s.n){el.innerHTML=who?`<div class="status"><span>Sociedade com <b>${escH(who)}</b>: ainda sem chaves em sociedade este mês.</span></div>`:'';return}
+  const ppl=[{name:'Tu',share:s.mine},...s.list];
+  el.innerHTML=`<div class="status"><span>Sociedade com <b>${escH(who||'parceiro(a)')}</b> este mês: ${s.n} chave${s.n===1?'':'s'}, ${eur(s.cost)} no total, ${eur(s.won)} em prémios</span></div><div class="tblwrap" style="margin-top:8px"><table class="tbl"><thead><tr><th>Pessoa</th><th class="num">Parte</th><th class="num">Paga</th><th class="num">Recebe</th></tr></thead><tbody>${ppl.map(p=>`<tr><td><b>${escH(p.name)}</b></td><td class="num">${pct(p.share)}</td><td class="num">${eur(s.cost*p.share)}</td><td class="num">${eur(s.won*p.share)}</td></tr>`).join('')}</tbody></table></div>`}
 async function drawWalletCard(){
   const W=1080,H=1350,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d'),K=CS(),F='"Nunito",system-ui,sans-serif',MONO='"IBM Plex Mono",ui-monospace,monospace';
   try{await Promise.all(['900 96px "Nunito"','800 60px "Nunito"','700 32px "Nunito"'].map(f=>document.fonts.load(f)))}catch(e){}
@@ -1801,22 +1821,23 @@ async function drawWalletCard(){
   const bw=(W-168-24)/2;tile(84,370,bw,210,eur(M.s),`gasto · ${M.n} chave${M.n===1?'':'s'}`);tile(84+bw+24,370,bw,210,eur(M.w),'ganho',M.w>0);
   tile(84,604,W-168,210,eur(M.w-M.s),M.w-M.s>=0?'saldo do mês · a sorrir!':'saldo do mês',M.w-M.s>=0&&M.w>0);
   let y=880;x.textAlign='center';
-  if(s.n){x.fillStyle='#fff';x.font=`900 46px ${F}`;x.fillText(`Sociedade com ${SET.partner||'parceiro(a)'}`,W/2,y);x.fillStyle='rgba(237,234,255,.85)';x.font=`700 32px ${F}`;
-    x.fillText(`${s.n} chave${s.n===1?'':'s'} · ${eur(s.cost)} no total`,W/2,y+56);x.fillText(`${UNAME}: ${eur(s.cost*s.mine)} · ${SET.partner||'parceiro(a)'}: ${eur(s.cost*s.theirs)}`,W/2,y+104);
-    x.fillText(`Prémios a dividir: ${eur(s.won)}`,W/2,y+152);y+=230}
+  if(s.n){x.fillStyle='#fff';x.font=`900 46px ${F}`;x.fillText(s.list.length>1?`Sociedade de ${s.list.length+1}`:`Sociedade com ${socNames()||'parceiro(a)'}`,W/2,y);x.fillStyle='rgba(237,234,255,.85)';x.font=`700 32px ${F}`;
+    x.fillText(`${s.n} chave${s.n===1?'':'s'} · ${eur(s.cost)} no total · prémios ${eur(s.won)}`,W/2,y+56);
+    const ppl=[{name:UNAME,share:s.mine},...s.list],per=ppl.length>2?2:1,lines=[];for(let i=0;i<ppl.length;i+=per)lines.push(ppl.slice(i,i+per).map(p=>`${p.name}: ${eur(s.cost*p.share)}`).join('  ·  '));
+    x.font=`700 ${ppl.length>6?26:30}px ${F}`;const lh=ppl.length>6?38:46;lines.slice(0,5).forEach((l,i)=>x.fillText(l,W/2,y+108+i*lh));y+=108+Math.min(5,lines.length)*lh+30}
   else{x.fillStyle='rgba(237,234,255,.8)';x.font=`700 34px ${F}`;x.fillText(+SET.limit?`Limite do mês: ${eur(+SET.limit)}${M.s>+SET.limit?' · passei o limite':' · dentro do limite'}`:'Joga com moderação',W/2,y+20);y+=120}
-  x.font=`900 50px ${F}`;const big='BOA SORTE!';const pw=x.measureText(big).width+120,py=Math.max(H-300,y);rr((W-pw)/2,py,pw,104,52);x.fillStyle=K.pill;x.fill();x.strokeStyle='rgba(255,255,255,.4)';x.lineWidth=2;x.stroke();x.fillStyle='#fff';x.fillText(big,W/2,py+70);
+  x.font=`900 50px ${F}`;const big='BOA SORTE!';const pw=x.measureText(big).width+120,py=Math.min(H-216,Math.max(H-300,y));rr((W-pw)/2,py,pw,104,52);x.fillStyle=K.pill;x.fill();x.strokeStyle='rgba(255,255,255,.4)';x.lineWidth=2;x.stroke();x.fillStyle='#fff';x.fillText(big,W/2,py+70);
   x.fillStyle='rgba(237,234,255,.5)';x.font=`500 22px ${MONO}`;x.fillText('Máquina da Sorte · © 2026 Júlio Melo',W/2,H-74);x.textAlign='left';
   return new Promise(r=>c.toBlob(r,'image/png'))}
 async function openWalletCard(){const blob=await drawWalletCard();if(!blob)return;if(CARD&&CARD.url)URL.revokeObjectURL(CARD.url);
   const now=new Date(),M=walletData()[now.getFullYear()*100+now.getMonth()+1]||{s:0,w:0,n:0},s=socData();
-  const text=`Carteira de ${UNAME} (${now.toLocaleDateString('pt-PT',{month:'long'})}): gasto ${eur(M.s)}, ganho ${eur(M.w)}.`+(s.n?` Sociedade com ${SET.partner||'parceiro(a)'}: ${eur(s.cost)} no total, eu ${eur(s.cost*s.mine)} e ${SET.partner||'parceiro(a)'} ${eur(s.cost*s.theirs)}.`:'');
+  const text=`Carteira de ${UNAME} (${now.toLocaleDateString('pt-PT',{month:'long'})}): gasto ${eur(M.s)}, ganho ${eur(M.w)}.`+(s.n?` Sociedade com ${socNames()||'parceiro(a)'}: ${eur(s.cost)} no total, eu ${eur(s.cost*s.mine)}`+s.list.map(p=>`, ${p.name} ${eur(s.cost*p.share)}`).join('')+'.':'');
   CARD={k:null,blob,url:URL.createObjectURL(blob),name:`carteira-${ymd(now)}.png`,text};$('cardImg').src=CARD.url;$('cardModal').hidden=false;$('cardNote').textContent='';
   let canShare=false;try{canShare=!!navigator.canShare&&navigator.canShare({files:[new File([blob],CARD.name,{type:'image/png'})]})}catch(e){}$('cardShare').hidden=!canShare}
 $('walletCard').addEventListener('click',openWalletCard);
 /* ---------- cartão da chave (imagem para partilhar) ---------- */
 let CARD=null;
-function cardText(k){const G=GAMES[k.g],d=k.d||nextDraw(k.g);return `${k.soc&&SET.partner?'A nossa chave':'A minha chave'} do ${G.label} para ${WD[fromYmd(d).getDay()].toLowerCase()} ${fmtD(d)}: ${k.n.join(' ')} + ${k.b.join(' ')}.${k.soc&&SET.partner?' Em sociedade com '+SET.partner+'.':''} Gerada na Máquina da Sorte.`}
+function cardText(k){const G=GAMES[k.g],d=k.d||nextDraw(k.g);return `${k.soc&&socNames()?'A nossa chave':'A minha chave'} do ${G.label} para ${WD[fromYmd(d).getDay()].toLowerCase()} ${fmtD(d)}: ${k.n.join(' ')} + ${k.b.join(' ')}.${k.soc&&socNames()?' Em sociedade com '+socNames()+'.':''} Gerada na Máquina da Sorte.`}
 async function drawCard(k){
   const G=GAMES[k.g],d=k.d||nextDraw(k.g),W=1080,H=1350,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
   try{await Promise.all(['900 96px "Nunito"','800 64px "Nunito"','700 34px "Nunito"','500 26px "IBM Plex Mono"'].map(f=>document.fonts.load(f)))}catch(e){}
@@ -1859,7 +1880,7 @@ async function drawCard(k){
   const s=STRATS.find(z=>z.id===k.s),si=shareIndex(k.g,k.n,k.b);
   let big,small,hot=false;
   if(st&&(st.state==='win'||st.state==='lose')){hot=st.state==='win';big=hot?`PRÉMIO ${st.label}`:'SEM PRÉMIO DESTA VEZ';small=`Acertou ${st.m} número${st.m===1?'':'s'}${k.g==='em'?` e ${st.mb} estrela${st.mb===1?'':'s'}`:st.mb?' e o sonho':''}`}
-  else{big='BOA SORTE!';small=k.soc&&SET&&SET.partner?`Em sociedade com ${SET.partner}`:k.src==='manual'||k.src==='talao'?'Chave registada à mão':`Modelo ${s?s.name:'Inteligente'} · ${shareLbl(si)}`}
+  else{big='BOA SORTE!';small=k.soc&&socNames()?(SET.members.length>2?`Em sociedade · ${SET.members.length+1} pessoas`:`Em sociedade com ${socNames()}`):k.src==='manual'||k.src==='talao'?'Chave registada à mão':`Modelo ${s?s.name:'Inteligente'} · ${shareLbl(si)}`}
   const py=PY+PH+70;x.font=`900 50px ${F}`;const bw=Math.min(W-168,x.measureText(big).width+120);rr((W-bw)/2,py,bw,104,52);
   if(hot){const g=x.createLinearGradient((W-bw)/2,0,(W+bw)/2,0);g.addColorStop(0,K.a1);g.addColorStop(1,K.a2);x.fillStyle=g}else x.fillStyle=K.pill;
   x.save();x.shadowColor='rgba(124,58,237,.6)';x.shadowBlur=40;x.fill();x.restore();x.strokeStyle='rgba(255,255,255,.4)';x.lineWidth=2;x.stroke();
@@ -1954,7 +1975,41 @@ function renderLab(){
   const nxt=hypSays(dr.length);
   $('hyp').innerHTML=`<div class="ev"><div><b>${after.length}</b><span>sorteios avaliados desde o registo</span></div><div><b>${ys?pct(yn/ys):'—'}</b><span>vezes que o 13 saiu quando o ritmo disse "sim" (${yn} em ${ys})</span></div><div><b>${ns?pct(nn/ns):'—'}</b><span>quando disse "não" (${nn} em ${ns}). Sem ritmo, ambos ficam perto de 10%.</span></div></div>
     <div class="status"><span>Próximo sorteio do EuroMilhões: o ritmo diz <b>${nxt?'sim':'não'}</b> para o 13.</span><span>Só ao fim de centenas de sorteios dá para concluir alguma coisa.</span></div>`;
+  renderLive();renderLearn();
 }
+/* ---------- aprender com os sorteios: duelo ao vivo e popularidade real ---------- */
+const LIVE_FROM=20261105;
+function tierProbs(G){const C=(n,k)=>{let r=1;for(let i=0;i<k;i++)r=r*(n-i)/(i+1);return r};const P={};
+  for(let m=0;m<=G.k;m++)for(let b=0;b<=G.kb;b++){if(!G.tier(m,b))continue;const k=G.tierKey(m,b);P[k]=(P[k]||0)+C(G.k,m)*C(G.N-G.k,G.k-m)/C(G.N,G.k)*C(G.kb,b)*C(G.B-G.kb,G.kb-b)/C(G.B,G.kb)}return P}
+function hashSeed(s){let h=2166136261;for(const c of String(s)){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
+function liveKeys(g,i){const G=GAMES[g],dr=DRAWS[g],hist=dr.slice(0,i),seen=new Set(hist.map(x=>x.n.join(','))),d=dr[i].d;
+  const e=einsteinKey(g,hist,mulberry(hashSeed('e'+g+d)),seen),r=mulberry(hashSeed('r'+g+d)),a={n:sampleU(G.N,G.k,r),b:sampleU(G.B,G.kb,r)};
+  const f=Array(G.N+1).fill(0),fb=Array(G.B+1).fill(0);hist.slice(-208).forEach(x=>{x.n.forEach(n=>f[n]++);x.b.forEach(b=>fb[b]++)});const rq=mulberry(hashSeed('q'+g+d));
+  const top=(arr,N,k)=>[...Array(N).keys()].map(j=>j+1).map(n=>({n,w:arr[n],r:rq()})).sort((p,q)=>q.w-p.w||p.r-q.r).slice(0,k).map(o=>o.n).sort((p,q)=>p-q);
+  return {einstein:e,acaso:a,quentes:{n:top(f,G.N,G.k),b:top(fb,G.B,G.kb)}}}
+function renderLive(){const g=S.game,G=GAMES[g],dr=DRAWS[g],idx=dr.map((x,i)=>x.d>=LIVE_FROM?i:-1).filter(i=>i>=0);
+  const names={einstein:'Einstein',acaso:'Ao acaso',quentes:'Quentes'};const sc={einstein:{p:0,m:0,best:null},acaso:{p:0,m:0,best:null},quentes:{p:0,m:0,best:null}};const rows=[];
+  for(const i of idx){const ks=liveKeys(g,i),x=dr[i];const row={d:x.d,x,ks:{}};
+    for(const k in ks){const n=ks[k].n,b=ks[k].b,m=n.filter(v=>x.n.includes(v)).length,mb=b.filter(v=>x.b.includes(v)).length,t=G.tier(m,mb);sc[k].m+=m;if(t){sc[k].p++;if(!sc[k].best||t<sc[k].best.t)sc[k].best={t,m,mb}}row.ks[k]={n,b,m,mb,t}}rows.push(row)}
+  const nd=nextDraw(g);
+  if(!idx.length){$('live').innerHTML=`<div class="note">O primeiro duelo é o sorteio de ${WD[fromYmd(nd).getDay()]} ${fmtD(nd)}. As três chaves já estão decididas pelo histórico até hoje; o resultado aparece aqui assim que o sorteio for carregado.</div>`;return}
+  $('live').innerHTML=`<div class="tblwrap"><table class="tbl"><thead><tr><th>Modelo</th><th class="num">Sorteios</th><th class="num">Prémios</th><th class="num">Certos</th><th class="num">Melhor</th></tr></thead><tbody>`+
+    Object.keys(names).map(k=>`<tr><td><b>${names[k]}</b></td><td class="num">${idx.length}</td><td class="num">${sc[k].p}</td><td class="num">${dec(sc[k].m/idx.length,2)}</td><td class="num">${sc[k].best?G.tierName(sc[k].best.m,sc[k].best.mb):'—'}</td></tr>`).join('')+
+    `</tbody></table></div><div class="status"><span>Esperado por chave: ${dec(G.k*G.k/G.N,2)} números certos e ${pct(comboP(G),1)} de hipótese de prémio.</span><span>Último duelo: ${shortD(rows[rows.length-1].d)}</span></div>`}
+let LEARN={em:null,ed:null};
+function learnFit(g){const G=GAMES[g],P=tierProbs(G),pAny=Object.values(P).reduce((a,b)=>a+b,0),low=G.tierOrder[G.tierOrder.length-1],pts=[];
+  for(const doc of Object.values(RES[g])){if(!Array.isArray(doc.tiers)||!doc.tiers.length)continue;const dr=DRAWS[g].find(x=>x.d===doc.d);if(!dr)continue;
+    const tot=doc.totalWinners||doc.tiers.reduce((a,r)=>a+(r.w||0),0);if(!tot)continue;const T=tot/pAny;let w=0,e=0;
+    for(const r of doc.tiers){if(r.t===low||typeof r.w!=='number')continue;const E=T*(P[r.t]||0);if(E<50)continue;w+=r.w;e+=E}
+    if(e>0&&w>0)pts.push({x:dr.n.filter(v=>v<=31).length,y:Math.log(w/e),d:doc.d})}
+  const n=pts.length;if(n<3)return {n,pts};const mx=pts.reduce((a,p)=>a+p.x,0)/n,my=pts.reduce((a,p)=>a+p.y,0)/n;
+  let sxx=0,sxy=0;pts.forEach(p=>{sxx+=(p.x-mx)**2;sxy+=(p.x-mx)*(p.y-my)});if(!sxx)return {n,pts};const b=sxy/sxx,a=my-b*mx;
+  let sse=0;pts.forEach(p=>{sse+=(p.y-a-b*p.x)**2});const se=n>2?Math.sqrt(sse/(n-2)/sxx):null;return {n,pts,b,se}}
+function learnedFactor(g){const L=LEARN[g];if(!L||L.n<25||L.se==null||!isFinite(L.b))return 1;if(Math.abs(L.b/L.se)<2)return 1;return Math.max(.5,Math.min(2.5,L.b/.15))} /* .15 = efeito por número ≤31 assumido no modelo base */
+function renderLearn(){const g=S.game,G=GAMES[g];LEARN[g]=learnFit(g);const L=LEARN[g],need=25;
+  if(!L||L.n<need){$('learn').innerHTML=`<div class="ev"><div><b>${L?L.n:0} de ${need}</b><span>sorteios do ${G.label} com vencedores oficiais já guardados. O robô junta um por sorteio.</span></div><div><b>${Math.round((L?L.n:0)/need*100)}%</b><span>da aprendizagem mínima. Até lá, o Einstein usa o modelo de partilha base.</span></div><div><b>${Math.max(0,Math.ceil((need-(L?L.n:0))/2))} semanas</b><span>até ter dados suficientes, a dois sorteios por semana.</span></div></div>`;return}
+  const eff=Math.exp(L.b)-1,f=learnedFactor(g);
+  $('learn').innerHTML=`<div class="ev"><div><b>${eff>=0?'+':''}${pct(eff)}</b><span>vencedores a mais por cada número até 31 na chave sorteada (± ${pct(Math.exp(L.se)-1)})</span></div><div><b>${L.n}</b><span>sorteios analisados</span></div><div><b>×${dec(f,2)}</b><span>${f===1?'peso base mantido (o efeito ainda não é claro)':'peso aprendido, aplicado à anti-partilha do Einstein'}</span></div></div>`}
 /* ---------- teste semana a semana ---------- */
 const SMART={res:null,seed:20261105,show:8};
 function comboP(G){const C=(n,k)=>{let r=1;for(let i=0;i<k;i++)r=r*(n-i)/(i+1);return r};let p=0;

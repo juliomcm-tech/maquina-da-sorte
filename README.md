@@ -48,7 +48,7 @@ Se os Jogos Santa Casa mudarem a página, o robô escreve um aviso nos registos 
 - **Ler o talão com a câmara**: em Conferir chaves. Lê as chaves e o código M1lhão; confirmas antes de registar.
 - **M1lhão**: guarda o código do talão; o robô traz o código sorteado e a app confere.
 - **Chaves de sempre**: ícone de repetir numa chave registada, e ela fica registada em todos os sorteios.
-- **Carteira**: gasto e ganho por mês, limite mensal com aviso, e **sociedade** (ícone das duas pessoas) com a parte de cada um.
+- **Carteira**: gasto e ganho por mês, limite mensal com aviso, e **sociedade** (ícone das duas pessoas) com até 10 pessoas. Cada uma com a sua %, ou partes iguais se deixares vazio.
 - **Avisos**: notificação no telemóvel quando há prémio (com a app aberta) e, com a app **ntfy**, aviso do resultado mesmo com a app fechada.
 - **PIN**: bloqueia a app neste telemóvel (Carteira → Bloqueio com PIN).
 - **Aparência**: 4 temas de cor (Midnight, Rosa, Verde menta, Branco), no ícone da paleta no fundo do menu.
@@ -56,6 +56,8 @@ Se os Jogos Santa Casa mudarem a página, o robô escreve um aviso nos registos 
 - **Telemóvel**: barra de navegação em baixo (Jogar, Resultados, Conferir, Carteira, Mais) e a máquina logo no topo.
 - **Nome**: em Mais → Definições muda o nome (cada telemóvel tem o seu).
 - **Resumo da carteira e sociedade**: botão "Partilhar resumo" na Carteira.
+- **Duelo ao vivo** (Laboratório): desde 05/11/2026, em cada sorteio a app joga em segredo Einstein, Ao acaso e Quentes, só com o histórico anterior, e mostra o placar real.
+- **O que a app já aprendeu** (Laboratório): compara os vencedores oficiais com o esperado para aprender que chaves o público joga mais. Com 25 sorteios e um efeito claro, afina sozinha a anti-partilha do Einstein.
 - **Instalar app**: ícone de transferir no fundo do menu (Android/Chrome). No iPhone: Safari → Partilhar → Adicionar ao ecrã principal.
 
 ## Só para ti
