@@ -607,6 +607,27 @@ html[data-skin="branco"] .mbar button{color:#2e1065}
 html[data-skin="branco"] .mbar button.on{background:rgba(124,108,230,.16)}
 html[data-skin="rosa"] .mbar button.play{background:linear-gradient(135deg,#ec4899,#fb7185)}
 html[data-skin="menta"] .mbar button.play{background:linear-gradient(135deg,#14b8a6,#a3e635)}
+
+/* ===== vidro 3D: brilho fixo atrás do ecrã (também no telemóvel) e janelas translúcidas ===== */
+html:root:root{--trgb:139,124,246;--glows:radial-gradient(900px 720px at -8% 108%,rgba(192,38,211,.58),transparent 62%),radial-gradient(900px 820px at 108% 100%,rgba(109,40,217,.64),transparent 62%),radial-gradient(820px 600px at 50% -12%,rgba(49,46,129,.95),transparent 72%),radial-gradient(520px 420px at 85% 35%,rgba(34,211,238,.10),transparent 70%)}
+html[data-skin="rosa"]:root:root{--trgb:244,114,182;--glows:radial-gradient(900px 720px at -8% 108%,rgba(236,72,153,.58),transparent 62%),radial-gradient(900px 820px at 108% 100%,rgba(190,24,93,.64),transparent 62%),radial-gradient(820px 600px at 50% -12%,rgba(100,20,70,.95),transparent 72%),radial-gradient(520px 420px at 85% 35%,rgba(251,146,60,.10),transparent 70%)}
+html[data-skin="menta"]:root:root{--trgb:94,234,212;--glows:radial-gradient(900px 720px at -8% 108%,rgba(16,185,129,.55),transparent 62%),radial-gradient(900px 820px at 108% 100%,rgba(13,148,136,.62),transparent 62%),radial-gradient(820px 600px at 50% -12%,rgba(6,78,64,.95),transparent 72%),radial-gradient(520px 420px at 85% 35%,rgba(163,230,53,.10),transparent 70%)}
+html[data-skin="branco"]:root:root{--trgb:124,108,230;--glows:radial-gradient(900px 720px at -8% 108%,rgba(251,207,232,.95),transparent 62%),radial-gradient(900px 820px at 108% 100%,rgba(216,180,254,.9),transparent 62%),radial-gradient(820px 600px at 50% -12%,rgba(186,230,253,.85),transparent 72%)}
+body,html[data-skin] body{background-image:none!important;background-color:var(--bg)}
+body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:var(--glows)}
+main{background:linear-gradient(160deg,rgba(10,10,38,.55),rgba(28,12,66,.30))!important;backdrop-filter:blur(2px)}
+html[data-skin="rosa"] main{background:linear-gradient(160deg,rgba(26,6,20,.55),rgba(66,10,44,.30))!important}
+html[data-skin="menta"] main{background:linear-gradient(160deg,rgba(4,20,18,.55),rgba(6,56,46,.30))!important}
+html[data-skin="branco"] main{background:linear-gradient(160deg,rgba(255,255,255,.62),rgba(245,240,255,.42))!important}
+.panel,html[data-skin] .panel{background:linear-gradient(160deg,rgba(var(--trgb),.17),rgba(var(--trgb),.06) 55%,rgba(255,255,255,.025));
+  border:1px solid rgba(255,255,255,.16);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),inset 0 -1px 0 rgba(0,0,0,.22),0 18px 50px rgba(0,0,0,.32);
+  backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%)}
+.cmp > div,.mod,.ev > div,.verdict,.li{background:linear-gradient(160deg,rgba(255,255,255,.09),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.14);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 8px 24px rgba(0,0,0,.18)}
+.music-player,html[data-skin] .music-player{box-shadow:inset 0 1px 0 rgba(255,255,255,.22),inset 0 -1px 0 rgba(0,0,0,.2),0 24px 60px rgba(0,0,0,.4);backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%)}
+html[data-skin="branco"] .panel{background:linear-gradient(160deg,rgba(255,255,255,.82),rgba(255,255,255,.58));border-color:rgba(255,255,255,.9);box-shadow:inset 0 1px 0 #fff,0 18px 50px rgba(76,29,149,.12)}
+html[data-skin="branco"] .cmp > div,html[data-skin="branco"] .mod,html[data-skin="branco"] .ev > div,html[data-skin="branco"] .verdict,html[data-skin="branco"] .li{background:rgba(255,255,255,.7);border-color:rgba(30,27,75,.08);box-shadow:0 6px 18px rgba(76,29,149,.06)}
+html[data-skin="branco"] .cmp .me{background:linear-gradient(135deg,#8b7cf6,#a855f7);color:#fff}
+@media (max-width:640px){.panel{backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%)}}
 </style>
 </head>
 <body>
