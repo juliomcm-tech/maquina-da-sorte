@@ -1,0 +1,25 @@
+{
+ "name": "Máquina da Sorte",
+ "short_name": "Máquina da Sorte",
+ "description": "EuroMilhões e EuroDreams: chave inteligente, resultados e conferência de chaves.",
+ "lang": "pt-PT",
+ "start_url": "./",
+ "scope": "./",
+ "display": "standalone",
+ "orientation": "portrait",
+ "background_color": "#0A0F1C",
+ "theme_color": "#13203B",
+ "icons": [
+  {
+   "src": "icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png"
+  },
+  {
+   "src": "icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any maskable"
+  }
+ ]
+}

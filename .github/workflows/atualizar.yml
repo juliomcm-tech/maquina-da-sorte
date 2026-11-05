@@ -1,0 +1,29 @@
+name: Atualizar resultados
+
+on:
+  workflow_dispatch:
+  schedule:
+    # hora UTC; os sorteios são por volta das 20h-21h de Lisboa
+    - cron: "47 21,23 * * 1,2,4,5"   # noite do sorteio (seg, ter, qui, sex)
+    - cron: "17 7 * * 2,3,5,6"        # manhã seguinte, para apanhar atrasos
+
+permissions:
+  contents: write
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python scripts/atualizar.py
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+      - name: Guardar se houver novidades
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add dados/resultados.json
+          if git diff --cached --quiet; then echo "Sem novidades."; else git commit -m "Resultados atualizados" && git push; fi
