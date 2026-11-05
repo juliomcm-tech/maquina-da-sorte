@@ -51,6 +51,8 @@ Se os Jogos Santa Casa mudarem a página, o robô escreve um aviso nos registos 
 - **Carteira**: gasto e ganho por mês, limite mensal com aviso, e **sociedade** (ícone das duas pessoas) com a parte de cada um.
 - **Avisos**: notificação no telemóvel quando há prémio (com a app aberta) e, com a app **ntfy**, aviso do resultado mesmo com a app fechada.
 - **PIN**: bloqueia a app neste telemóvel (Carteira → Bloqueio com PIN).
+- **Aparência**: 4 temas de cor (Midnight, Rosa, Verde menta, Branco), no ícone da paleta no fundo do menu.
+- **Instalar app**: ícone de transferir no fundo do menu (Android/Chrome). No iPhone: Safari → Partilhar → Adicionar ao ecrã principal.
 
 ## Só para ti
 
