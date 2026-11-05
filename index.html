@@ -917,7 +917,7 @@ html[data-skin="branco"] .tbl th,html[data-skin="branco"] .tbl td{border-bottom-
         <p id="stratDesc"></p>
         <div class="qtyrow">
           <label for="progress" id="qtyLbl">1 chave</label>
-          <input type="range" value="1" min="1" max="5" step="1" id="progress" aria-label="Número de chaves">
+          <input type="range" value="1" min="1" max="10" step="1" id="progress" aria-label="Número de chaves">
         </div>
         <div class="controls">
           <button class="backward" id="prevS" aria-label="Estratégia anterior"><span data-ic="back"></span></button>
@@ -1415,7 +1415,7 @@ function spinDrum(sec){DRUM.motor=sec;drumWake()}
 function renderPlayer(){
   const G=GAMES[S.game],s=STRATS.find(x=>x.id===S.strat);
   $('stratName').textContent=s.name;$('stratDesc').textContent=`${s.d} · ${G.label}`;
-  const r=$('progress');r.value=S.qty;r.style.setProperty('--p',((S.qty-1)/4*100)+'%');$('qtyLbl').textContent=S.qty+(S.qty>1?' chaves':' chave');
+  const r=$('progress');r.value=S.qty;r.style.setProperty('--p',((S.qty-1)/9*100)+'%');$('qtyLbl').textContent=S.qty+(S.qty>1?' chaves':' chave')+' · '+eur(S.qty*GAMES[S.game].price);
   const F=activeFilters();
   $('fchips').innerHTML=FILTERS.map(f=>{const forced=S.strat==='inteligente'||S.strat==='einstein'||(S.strat==='equilibrado'&&['sum','odd','run','nova'].includes(f.id))||(S.strat==='antipartilha'&&f.id==='aniv');
     const extra=f.id==='sum'?` ${CUR.p10}–${CUR.p90}`:'';
