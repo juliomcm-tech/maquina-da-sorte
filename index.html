@@ -906,6 +906,7 @@ html[data-skin="branco"] .tbl th,html[data-skin="branco"] .tbl td{border-bottom-
           <canvas id="drum" width="184" height="184" tabindex="0" role="img" aria-label="Tambor com as bolas. Arrasta em círculo para o rodar, ou usa as setas do teclado."></canvas>
         </div>
         <p class="drumhint">Roda o tambor com o dedo</p>
+        <button type="button" class="fchip" id="tiltBtn" hidden aria-pressed="false">Mexer com o telemóvel</button>
         <h2 id="stratName">Puro acaso</h2>
         <p id="stratDesc"></p>
         <div class="qtyrow">
@@ -1318,7 +1319,7 @@ function renderFacts(){
 }
 /* player */
 /* ---------- tambor com física: as bolas assentam no fundo pelo peso e rolam quando o tambor roda ---------- */
-const DRUM={balls:[],ang:0,om:0,motor:0,R:84,drag:null,raf:0,still:0,vis:true,dpr:1,lastT:0};
+const DRUM={gx:0,gy:1500,balls:[],ang:0,om:0,motor:0,R:84,drag:null,raf:0,still:0,vis:true,dpr:1,lastT:0};
 function drumBalls(){
   const G=GAMES[S.game],c=$('drum');if(!c)return;
   const nums=sampleW(Array(G.N+1).fill(1),15,[]),st=sampleW(Array(G.B+1).fill(1),Math.min(4,G.B),[]);
@@ -1328,11 +1329,12 @@ function drumBalls(){
 }
 function drumSize(){const c=$('drum');if(!c)return;const dpr=Math.min(3,window.devicePixelRatio||1);DRUM.dpr=dpr;const w=c.clientWidth||184;c.width=Math.round(w*dpr);c.height=Math.round(w*dpr);DRUM.scale=w/184}
 function drumStep(dt){
-  const R=DRUM.R,B=DRUM.balls,g=1500,e=.32,mu=.12,fins=3,finLen=22;
+  const R=DRUM.R,B=DRUM.balls,e=.32,mu=.12,fins=3,finLen=22;
+  if(typeof TILT!=='undefined'&&TILT.on){DRUM.gx+=(TILT.tx-DRUM.gx)*Math.min(1,dt*10);DRUM.gy+=(TILT.ty-DRUM.gy)*Math.min(1,dt*10)}else{DRUM.gx+=(0-DRUM.gx)*Math.min(1,dt*6);DRUM.gy+=(1500-DRUM.gy)*Math.min(1,dt*6)}
   if(DRUM.motor>0){DRUM.motor-=dt;DRUM.om+=(13-DRUM.om)*Math.min(1,dt*4)}
   else if(!DRUM.drag)DRUM.om*=Math.exp(-dt*.9);
   DRUM.ang+=DRUM.om*dt;
-  for(const b of B){b.c=false;b.vy+=g*dt;b.vx*=1-dt*.15;b.vy*=1-dt*.15;b.x+=b.vx*dt;b.y+=b.vy*dt}
+  for(const b of B){b.c=false;b.vx+=DRUM.gx*dt;b.vy+=DRUM.gy*dt;b.vx*=1-dt*.15;b.vy*=1-dt*.15;b.x+=b.vx*dt;b.y+=b.vy*dt}
   // bolas contra bolas
   for(let i=0;i<B.length;i++)for(let j=i+1;j<B.length;j++){const a=B[i],b=B[j];let dx=b.x-a.x,dy=b.y-a.y,d2=dx*dx+dy*dy,m=a.r+b.r;
     if(d2<m*m&&d2>1e-6){a.c=b.c=true;const d=Math.sqrt(d2),nx=dx/d,ny=dy/d,ov=(m-d)/2;a.x-=nx*ov;a.y-=ny*ov;b.x+=nx*ov;b.y+=ny*ov;
@@ -1386,7 +1388,7 @@ function drumLoop(t){
   DRUM.raf=0;const dt=Math.min(.033,DRUM.lastT?(t-DRUM.lastT)/1000:.016);DRUM.lastT=t;
   const sub=6;for(let i=0;i<sub;i++)drumStep(dt/sub);drumDraw();
   // depois de 3 s com o tambor parado, as bolas já assentaram: pára a animação para poupar bateria
-  const calm=!DRUM.drag&&DRUM.motor<=0&&Math.abs(DRUM.om)<.03;
+  const calm=!DRUM.drag&&DRUM.motor<=0&&Math.abs(DRUM.om)<.03&&!(typeof TILT!=='undefined'&&TILT.on&&Math.abs(TILT.tx-DRUM.gx)+Math.abs(TILT.ty-DRUM.gy)>30);
   DRUM.calmT=calm?(DRUM.calmT||0)+dt:0;
   if(DRUM.vis&&DRUM.calmT<3)DRUM.raf=requestAnimationFrame(drumLoop);else DRUM.lastT=0;
 }
@@ -1731,6 +1733,29 @@ $('sheetClose').addEventListener('click',()=>{$('menuSheet').hidden=true});
 $('menuSheet').addEventListener('click',e=>{if(e.target.id==='menuSheet')$('menuSheet').hidden=true});
 document.querySelectorAll('[data-msec]').forEach(b=>b.addEventListener('click',()=>goSec(b.dataset.msec)));
 new MutationObserver(()=>{const act=document.querySelector('#secNav .nav-item.active a');const id=act&&act.dataset.sec;document.querySelectorAll('[data-msec]').forEach(b=>b.classList.toggle('on',b.dataset.msec===id&&id!=='jogar'))}).observe($('secNav'),{subtree:true,attributes:true,attributeFilter:['class']});
+/* ---------- bolas com o movimento do telemóvel (inclinar e abanar) ---------- */
+const TILT={on:false,tx:0,ty:1500,last:0};
+function tiltHandler(e){const a=e.accelerationIncludingGravity;if(!a||a.x==null)return;
+  const ios=/iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  let gx=-(a.x||0),gy=(a.y||0);if(ios){gx=-gx;gy=-gy}
+  const ang=((screen.orientation&&screen.orientation.angle)||window.orientation||0)*Math.PI/180;
+  const rx=gx*Math.cos(ang)+gy*Math.sin(ang),ry=-gx*Math.sin(ang)+gy*Math.cos(ang);
+  const G=1500/9.81;TILT.tx=rx*G;TILT.ty=ry*G;
+  const sh=e.acceleration;const mag=sh&&sh.x!=null?Math.hypot(sh.x,sh.y,sh.z||0):0;
+  if(mag>11&&performance.now()-TILT.last>120){TILT.last=performance.now();const k=Math.min(900,mag*38);
+    for(const b of DRUM.balls){b.vx+=(Math.random()-.5)*k;b.vy+=(Math.random()-.5)*k-k*.3}drumWake()}
+  const dg=Math.abs(TILT.tx-DRUM.gx)+Math.abs(TILT.ty-DRUM.gy);if(dg>40)drumWake()}
+async function enableTilt(silent){
+  try{if(typeof DeviceMotionEvent!=='undefined'&&typeof DeviceMotionEvent.requestPermission==='function'){const p=await DeviceMotionEvent.requestPermission();if(p!=='granted'){if(!silent)toast('Sem acesso ao sensor de movimento');return false}}}catch(e){if(!silent)toast('Sem acesso ao sensor de movimento');return false}
+  window.addEventListener('devicemotion',tiltHandler);TILT.on=true;try{localStorage.setItem('maquina_tilt','1')}catch(e){}renderTilt();if(!silent)toast('Inclina ou abana o telemóvel!');return true}
+function disableTilt(){window.removeEventListener('devicemotion',tiltHandler);TILT.on=false;TILT.tx=0;TILT.ty=1500;try{localStorage.removeItem('maquina_tilt')}catch(e){}renderTilt();drumWake()}
+function renderTilt(){const b=$('tiltBtn');if(!b)return;b.setAttribute('aria-pressed',String(TILT.on));b.textContent=TILT.on?'Movimento ligado':'Mexer com o telemóvel'}
+(function(){const b=$('tiltBtn');if(!b)return;const touch=matchMedia('(pointer:coarse)').matches;
+  if(window.claude||!('DeviceMotionEvent' in window)||!touch){b.hidden=true;return}
+  b.hidden=false;b.addEventListener('click',()=>{TILT.on?disableTilt():enableTilt()});
+  let saved=false;try{saved=localStorage.getItem('maquina_tilt')==='1'}catch(e){}
+  const ios=/iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  if(saved&&!ios)enableTilt(true);renderTilt()})();
 /* ---------- temas de cor ---------- */
 const SKINS={
   midnight:{name:'Midnight',prev:'radial-gradient(70% 90% at 0% 100%,#c026d3,transparent 60%),radial-gradient(70% 90% at 100% 100%,#6d28d9,transparent 60%),#0b0a24',meta:'#0b0a24',
