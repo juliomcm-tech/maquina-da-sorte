@@ -563,6 +563,50 @@ html[data-skin="branco"] .verdict b{color:#7c3aed}
 html[data-skin="branco"] .mini i{border-color:rgba(30,27,75,.15)}
 html[data-skin="branco"] .song-img{border-color:rgba(30,27,75,.1)}
 html[data-skin="branco"] .slide-overlay button{color:#fff}
+
+/* ===== telemóvel: barra em baixo (estilo app nativa) ===== */
+.mbar{display:none}
+.avatar{cursor:pointer}
+.setname{display:flex;gap:8px;width:100%}
+.setname input{flex:1;min-width:0;font:inherit;font-size:16px;padding:9px 12px;border-radius:12px;border:1.5px solid rgba(255,255,255,.3);background:rgba(255,255,255,.08);color:#fff}
+.sheetgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;width:100%}
+.sheetgrid button{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px;border-radius:16px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#fff;font-size:12px;font-weight:700;text-align:center;line-height:1.2}
+.sheetgrid button.on{background:rgba(255,255,255,.2)}
+.sheetgrid svg.i{width:24px;height:24px}
+.sheetgrid small{display:none}
+.sheetgrid .nav-text{display:block!important}
+.playnow{display:none}
+@media (max-width:1180px){.right-content .music-player{order:-1}}
+@media (max-width:640px){
+  main{display:block;margin:8px max(8px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 88px) max(8px,env(safe-area-inset-left,0px));border-radius:22px;min-height:0}
+  .main-menu{display:none}
+  .content{display:flex;flex-direction:column;padding:14px 14px 0!important;gap:22px}
+  .left-content{padding-right:0;gap:24px}
+  .right-content{padding:0!important;border:0;gap:16px;display:flex!important;flex-direction:column}
+  .panel{padding:16px;border-radius:20px}
+  .music-player{border-radius:22px;padding:18px 14px}
+  .album-cover{width:200px;height:200px}
+  .swiper-wrapper{padding:10px 8%}
+  .swiper-slide{flex-basis:84%;min-height:240px;padding:16px}
+  .head{margin-bottom:10px}
+  .left-content > div > h1,.left-content section > h1,.head h1,.recommended-songs h1{font-size:23px!important}
+  .head p{font-size:13px}
+  .playnow{display:inline-flex}
+  .mbar{display:flex;position:fixed;z-index:60;left:max(10px,env(safe-area-inset-left,0px));right:max(10px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 10px);
+    height:66px;border-radius:22px;padding:6px;gap:4px;background:rgba(14,12,40,.78);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(225,215,255,.28);box-shadow:0 12px 40px rgba(0,0,0,.45)}
+  .mbar button{flex:1;border:0;background:transparent;color:#EDEAFF;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:10.5px;font-weight:700;padding:0;min-width:0}
+  .mbar button.on{background:rgba(255,255,255,.16)}
+  .mbar button.play{background:linear-gradient(135deg,var(--accent),#d946ef);color:#fff;margin:0 2px}
+  .mbar svg.i{width:22px;height:22px}
+  .foot{padding-bottom:8px}
+}
+html[data-skin="rosa"] .mbar{background:rgba(30,8,22,.8)}
+html[data-skin="menta"] .mbar{background:rgba(4,24,20,.8)}
+html[data-skin="branco"] .mbar{background:rgba(255,255,255,.88);border-color:rgba(30,27,75,.12)}
+html[data-skin="branco"] .mbar button{color:#2e1065}
+html[data-skin="branco"] .mbar button.on{background:rgba(124,108,230,.16)}
+html[data-skin="rosa"] .mbar button.play{background:linear-gradient(135deg,#ec4899,#fb7185)}
+html[data-skin="menta"] .mbar button.play{background:linear-gradient(135deg,#14b8a6,#a3e635)}
 </style>
 </head>
 <body>
@@ -572,10 +616,11 @@ html[data-skin="branco"] .slide-overlay button{color:#fff}
     <div>
       <div class="brand">Máquina<br><span>da</span> Sorte</div>
       <div class="user-info">
-        <span class="avatar" aria-hidden="true">J</span>
-        <div><p>Júlio</p><small id="userGame">EuroMilhões</small></div>
+        <span class="avatar" id="avatar" role="button" tabindex="0" aria-label="Definições">J</span>
+        <div><p id="userName">Júlio</p><small id="userGame">EuroMilhões</small></div>
       </div>
       <ul id="secNav">
+        <li class="nav-item"><a href="#jogar" data-sec="jogar"><span data-ic="play"></span><span class="nav-text">Jogar</span></a></li>
         <li class="nav-item active"><a href="#descobrir" data-sec="descobrir"><span data-ic="map"></span><span class="nav-text">Descobrir</span></a></li>
         <li class="nav-item"><a href="#resultados" data-sec="resultados"><span data-ic="bell"></span><span class="nav-text">Resultados</span></a></li>
         <li class="nav-item"><a href="#conferir" data-sec="conferir"><span data-ic="check"></span><span class="nav-text">Conferir chaves</span></a></li>
@@ -593,7 +638,7 @@ html[data-skin="branco"] .slide-overlay button{color:#fff}
       <li class="nav-item" id="n-em"><a href="#" data-game="em"><span data-ic="euro"></span><span class="nav-text">EuroMilhões<small>5/50 + 2/12</small></span></a></li>
       <li class="nav-item" id="n-ed"><a href="#" data-game="ed"><span data-ic="moon"></span><span class="nav-text">EuroDreams<small>6/40 + 1/5</small></span></a></li>
       <li class="nav-item"><a href="#" data-cycle="period"><span data-ic="cal"></span><span class="nav-text">Período<small id="periodLbl">2 anos</small></span></a></li>
-      <li class="nav-item"><a href="#" data-skinopen="1"><span data-ic="palette"></span><span class="nav-text">Aparência</span></a></li>
+      <li class="nav-item"><a href="#" data-skinopen="1"><span data-ic="palette"></span><span class="nav-text">Definições</span></a></li>
       <li class="nav-item" id="installItem" hidden><a href="#" data-install="1"><span data-ic="download"></span><span class="nav-text">Instalar app</span></a></li>
     </ul>
   </nav>
@@ -601,7 +646,7 @@ html[data-skin="branco"] .slide-overlay button{color:#fff}
   <section class="content">
     <div class="left-content">
       <div class="slider-container" id="descobrir">
-        <div class="head"><div><h1>Últimos sorteios</h1><p id="slideSub"></p></div></div>
+        <div class="head"><div><h1>Últimos sorteios</h1><p id="slideSub"></p></div><button type="button" class="btn primary playnow" data-go="jogar"><span data-ic="play"></span>Jogar agora</button></div>
         <div class="swiper">
           <div class="swiper-wrapper" id="slides" aria-roledescription="carrossel"></div>
           <div class="swiper-pagination" id="dots"></div>
@@ -658,8 +703,9 @@ html[data-skin="branco"] .slide-overlay button{color:#fff}
       </section>
 
       <section class="panel" id="carteira">
-        <div class="head"><div><h1>Carteira</h1><p>Gasto e ganho por mês com todas as chaves registadas nos dois jogos. Nas chaves em sociedade, conta só a tua parte.</p></div></div>
+        <div class="head"><div><h1>Carteira</h1><p>Gasto e ganho por mês com todas as chaves registadas nos dois jogos. Nas chaves em sociedade, conta só a tua parte.</p></div><div class="act"><button type="button" class="btn primary" id="walletCard"><span data-ic="share"></span>Partilhar resumo</button></div></div>
         <div id="walletKpi"></div>
+        <div id="socBox"></div>
         <div class="chart" style="margin-top:14px"><h3>Últimos 12 meses</h3><div class="leg"><span>gasto</span><span class="w">ganho</span></div><div class="bars2" id="walletBars"></div><div class="xl" id="walletX"></div></div>
         <div class="subblock">
           <h3>Limite e sociedade</h3>
@@ -768,7 +814,7 @@ html[data-skin="branco"] .slide-overlay button{color:#fff}
         <div class="song-container" id="songs"></div>
       </div>
 
-      <div class="music-player" aria-label="Máquina de sortear">
+      <div class="music-player" id="jogar" aria-label="Máquina de sortear">
         <div class="album-cover">
           <canvas id="drum" width="184" height="184" tabindex="0" role="img" aria-label="Tambor com as bolas. Arrasta em círculo para o rodar, ou usa as setas do teclado."></canvas>
         </div>
@@ -813,12 +859,19 @@ html[data-skin="branco"] .slide-overlay button{color:#fff}
     <p id="cardNote"></p>
   </div>
 </div>
-<div class="cardmodal" id="skinModal" hidden role="dialog" aria-modal="true" aria-label="Aparência">
+<div class="cardmodal" id="skinModal" hidden role="dialog" aria-modal="true" aria-label="Definições">
   <div class="cardbox">
-    <h2 style="font-size:24px;font-weight:800">Aparência</h2>
+    <h2 style="font-size:24px;font-weight:800">Definições</h2>
+    <form class="setname" id="nameForm" novalidate><input id="nameIn" maxlength="24" autocomplete="off" aria-label="O teu nome" placeholder="O teu nome"><button type="submit" class="btn primary">Guardar</button></form>
+    <p style="margin:0;font-size:12px;opacity:.7">Cada telemóvel tem o seu nome, chaves e carteira. Assim a tua esposa usa a app no telemóvel dela, à maneira dela.</p>
+    <h3 style="font-size:16px;font-weight:800;align-self:flex-start;margin-top:4px">Cor</h3>
     <div class="skins" id="skins"></div>
     <div class="row"><button type="button" class="btn" id="skinClose">Fechar</button></div>
   </div>
+</div>
+<nav class="mbar" id="mbar" aria-label="Menu rápido"><button type="button" data-msec="jogar" class="play" aria-label="Jogar"><span data-ic=play></span>Jogar</button><button type="button" data-msec="resultados" class="" aria-label="Resultados"><span data-ic=bell></span>Resultados</button><button type="button" data-msec="conferir" class="" aria-label="Conferir"><span data-ic=check></span>Conferir</button><button type="button" data-msec="carteira" class="" aria-label="Carteira"><span data-ic=wallet></span>Carteira</button><button type="button" id="mMore" aria-label="Mais"><span data-ic="grid"></span>Mais</button></nav>
+<div class="cardmodal" id="menuSheet" hidden role="dialog" aria-modal="true" aria-label="Menu">
+  <div class="cardbox"><h2 style="font-size:22px;font-weight:800">Menu</h2><div class="sheetgrid" id="sheetGrid"></div><div class="row"><button type="button" class="btn" id="sheetClose">Fechar</button></div></div>
 </div>
 <div id="tip" role="tooltip"></div>
 <div id="toast" role="status" aria-live="polite"></div>
@@ -1073,7 +1126,7 @@ function renderAll(){
   document.querySelectorAll('#gameNav [data-game]').forEach(a=>a.parentElement.classList.toggle('active',a.dataset.game===S.game));
   $('userGame').textContent=G.label;
   $('periodLbl').textContent=PERIODS.find(p=>p[0]===S.period)[1];
-  renderSlides();renderResults();renderConferir();renderWallet();renderM1();renderFixList();renderSmart();renderLab();renderArtists();renderAlbums();renderSlip();renderPatterns();renderTruth();renderFacts();renderPlayer();renderNow(false);renderSongs();
+  renderSlides();renderResults();renderConferir();renderWallet();renderSoc();renderM1();renderFixList();renderSmart();renderLab();renderArtists();renderAlbums();renderSlip();renderPatterns();renderTruth();renderFacts();renderPlayer();renderNow(false);renderSongs();
   save();
 }
 
@@ -1575,6 +1628,22 @@ function pinOff(){SET.pin=null;saveSet();renderWallet();toast('PIN retirado')}
 async function lockSubmit(e){e.preventDefault();const v=$('pinIn').value.trim();if(await hashPin(v)===SET.pin){$('lock').hidden=true;$('pinIn').value=''}else{$('pinErr').textContent='PIN errado. Se o esqueceste, limpa os dados do site no browser (perdes as chaves que não tenham cópia).';$('pinIn').value=''}}
 if(SET.pin){$('lock').hidden=false;setTimeout(()=>$('pinIn').focus(),50)}
 
+/* ---------- nome, barra do telemóvel ---------- */
+let UNAME='Júlio';try{UNAME=localStorage.getItem('maquina_name')||'Júlio'}catch(e){}
+function renderName(){$('userName').textContent=UNAME;$('avatar').textContent=(UNAME.trim()[0]||'J').toUpperCase();$('nameIn').value=UNAME}
+function openSettings(){renderSkins();renderName();$('skinModal').hidden=false}
+$('avatar').addEventListener('click',openSettings);$('avatar').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openSettings()}});
+$('nameForm').addEventListener('submit',e=>{e.preventDefault();const v=$('nameIn').value.trim().slice(0,24);if(!v)return;UNAME=v;try{localStorage.setItem('maquina_name',v)}catch(er){}renderName();toast('Olá, '+v+'!')});
+renderName();
+function goSec(id){const el=$(id);if(el)el.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'})}
+function buildSheet(){const g=$('sheetGrid');g.innerHTML='';document.querySelectorAll('.main-menu .nav-item').forEach(li=>{const a=li.querySelector('a');if(!a||li.hidden)return;
+  const b=document.createElement('button');b.type='button';b.className=li.classList.contains('active')?'on':'';b.innerHTML=a.innerHTML;b.querySelectorAll('.nav-text').forEach(s=>s.style.display='block');
+  b.addEventListener('click',()=>{$('menuSheet').hidden=true;a.click()});g.appendChild(b)})}
+$('mMore').addEventListener('click',()=>{buildSheet();$('menuSheet').hidden=false});
+$('sheetClose').addEventListener('click',()=>{$('menuSheet').hidden=true});
+$('menuSheet').addEventListener('click',e=>{if(e.target.id==='menuSheet')$('menuSheet').hidden=true});
+document.querySelectorAll('[data-msec]').forEach(b=>b.addEventListener('click',()=>goSec(b.dataset.msec)));
+new MutationObserver(()=>{const act=document.querySelector('#secNav .nav-item.active a');const id=act&&act.dataset.sec;document.querySelectorAll('[data-msec]').forEach(b=>b.classList.toggle('on',b.dataset.msec===id&&id!=='jogar'))}).observe($('secNav'),{subtree:true,attributes:true,attributeFilter:['class']});
 /* ---------- temas de cor ---------- */
 const SKINS={
   midnight:{name:'Midnight',prev:'radial-gradient(70% 90% at 0% 100%,#c026d3,transparent 60%),radial-gradient(70% 90% at 100% 100%,#6d28d9,transparent 60%),#0b0a24',meta:'#0b0a24',
@@ -1595,6 +1664,44 @@ function renderSkins(){const el=$('skins');if(!el)return;el.innerHTML=Object.ent
 const CS=()=>(SKINS[SKIN].card||SKINS.midnight.card);
 const DC=()=>SKINS[SKIN].drum;
 applySkin(SKIN);
+/* ---------- resumo da carteira e da sociedade ---------- */
+function socData(){const now=new Date(),cur=now.getFullYear()*100+now.getMonth()+1;let n=0,cost=0,won=0;
+  for(const k of KEYS){if(!k.soc||!k.d||Math.floor(k.d/100)!==cur)continue;const G=GAMES[k.g];n++;cost+=G.price;const st=keyStatus(k);if(st.state==='win'&&st.prize!=null)won+=st.prize}
+  const part=Math.max(0,Math.min(100,+SET.split||0))/100;return {n,cost,won,mine:1-part,theirs:part}}
+function renderSoc(){const el=$('socBox');if(!el)return;const s=socData();
+  if(!s.n){el.innerHTML=SET.partner?`<div class="status"><span>Sociedade com <b>${SET.partner}</b>: ainda sem chaves em sociedade este mês.</span></div>`:'';return}
+  el.innerHTML=`<div class="status"><span>Sociedade com <b>${SET.partner||'parceiro(a)'}</b> este mês: ${s.n} chave${s.n===1?'':'s'}, ${eur(s.cost)} no total</span><span>Tu pagas <b>${eur(s.cost*s.mine)}</b> · ${SET.partner||'parceiro(a)'} paga <b>${eur(s.cost*s.theirs)}</b></span><span>Prémios: ${eur(s.won)} (tu ${eur(s.won*s.mine)} · ${SET.partner||'parceiro(a)'} ${eur(s.won*s.theirs)})</span></div>`}
+async function drawWalletCard(){
+  const W=1080,H=1350,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d'),K=CS(),F='"Nunito",system-ui,sans-serif',MONO='"IBM Plex Mono",ui-monospace,monospace';
+  try{await Promise.all(['900 96px "Nunito"','800 60px "Nunito"','700 32px "Nunito"'].map(f=>document.fonts.load(f)))}catch(e){}
+  x.fillStyle=K.base;x.fillRect(0,0,W,H);
+  const glow=(cx,cy,r,col)=>{const g=x.createRadialGradient(cx,cy,0,cx,cy,r);g.addColorStop(0,col);g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(0,0,W,H)};
+  glow(-60,H+40,900,K.g[0]);glow(W+80,H-200,900,K.g[1]);glow(W*.8,140,520,K.g[2]);glow(W*.5,-120,700,K.g[3]);
+  const rr=(X,Y,w,h,r)=>{x.beginPath();x.moveTo(X+r,Y);x.arcTo(X+w,Y,X+w,Y+h,r);x.arcTo(X+w,Y+h,X,Y+h,r);x.arcTo(X,Y+h,X,Y,r);x.arcTo(X,Y,X+w,Y,r);x.closePath()};
+  rr(36,36,W-72,H-72,48);x.lineWidth=2;x.strokeStyle='rgba(225,215,255,.38)';x.stroke();
+  const MES=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];const now=new Date(),cur=now.getFullYear()*100+now.getMonth()+1;
+  const M=walletData()[cur]||{s:0,w:0,n:0},s=socData();
+  x.font=`800 26px ${F}`;const tag='CARTEIRA';const tw=x.measureText(tag).width+48;rr(84,92,tw,52,26);x.fillStyle=K.tag;x.fill();x.strokeStyle='rgba(255,255,255,.35)';x.lineWidth=1.5;x.stroke();x.fillStyle='#fff';x.fillText(tag,108,127);
+  x.font=`900 88px ${F}`;const tg=x.createLinearGradient(84,0,760,0);tg.addColorStop(0,'#fff');tg.addColorStop(1,K.tint);x.fillStyle=tg;x.fillText(`${UNAME} · ${MES[now.getMonth()]}`,84,250);
+  x.fillStyle='rgba(237,234,255,.78)';x.font=`700 34px ${F}`;x.fillText(`Máquina da Sorte · ${now.getFullYear()}`,86,306);
+  const tile=(X,Y,w,h,big,lab,hot)=>{rr(X,Y,w,h,32);if(hot){const g=x.createLinearGradient(X,Y,X+w,Y+h);g.addColorStop(0,K.a1);g.addColorStop(1,K.a2);x.fillStyle=g}else{const g=x.createLinearGradient(0,Y,0,Y+h);g.addColorStop(0,K.pt);g.addColorStop(1,K.pb);x.fillStyle=g}
+    x.fill();x.strokeStyle='rgba(235,228,255,.45)';x.lineWidth=2;x.stroke();x.fillStyle='#fff';x.font=`900 76px ${F}`;x.fillText(big,X+36,Y+h/2+14);x.fillStyle='rgba(255,255,255,.8)';x.font=`700 28px ${F}`;x.fillText(lab,X+38,Y+h-34)};
+  const bw=(W-168-24)/2;tile(84,370,bw,210,eur(M.s),`gasto · ${M.n} chave${M.n===1?'':'s'}`);tile(84+bw+24,370,bw,210,eur(M.w),'ganho',M.w>0);
+  tile(84,604,W-168,210,eur(M.w-M.s),M.w-M.s>=0?'saldo do mês · a sorrir!':'saldo do mês',M.w-M.s>=0&&M.w>0);
+  let y=880;x.textAlign='center';
+  if(s.n){x.fillStyle='#fff';x.font=`900 46px ${F}`;x.fillText(`Sociedade com ${SET.partner||'parceiro(a)'}`,W/2,y);x.fillStyle='rgba(237,234,255,.85)';x.font=`700 32px ${F}`;
+    x.fillText(`${s.n} chave${s.n===1?'':'s'} · ${eur(s.cost)} no total`,W/2,y+56);x.fillText(`${UNAME}: ${eur(s.cost*s.mine)} · ${SET.partner||'parceiro(a)'}: ${eur(s.cost*s.theirs)}`,W/2,y+104);
+    x.fillText(`Prémios a dividir: ${eur(s.won)}`,W/2,y+152);y+=230}
+  else{x.fillStyle='rgba(237,234,255,.8)';x.font=`700 34px ${F}`;x.fillText(+SET.limit?`Limite do mês: ${eur(+SET.limit)}${M.s>+SET.limit?' · passei o limite':' · dentro do limite'}`:'Joga com moderação',W/2,y+20);y+=120}
+  x.font=`900 50px ${F}`;const big='BOA SORTE!';const pw=x.measureText(big).width+120,py=Math.max(H-300,y);rr((W-pw)/2,py,pw,104,52);x.fillStyle=K.pill;x.fill();x.strokeStyle='rgba(255,255,255,.4)';x.lineWidth=2;x.stroke();x.fillStyle='#fff';x.fillText(big,W/2,py+70);
+  x.fillStyle='rgba(237,234,255,.5)';x.font=`500 22px ${MONO}`;x.fillText('Máquina da Sorte · © 2026 Júlio Melo',W/2,H-74);x.textAlign='left';
+  return new Promise(r=>c.toBlob(r,'image/png'))}
+async function openWalletCard(){const blob=await drawWalletCard();if(!blob)return;if(CARD&&CARD.url)URL.revokeObjectURL(CARD.url);
+  const now=new Date(),M=walletData()[now.getFullYear()*100+now.getMonth()+1]||{s:0,w:0,n:0},s=socData();
+  const text=`Carteira de ${UNAME} (${now.toLocaleDateString('pt-PT',{month:'long'})}): gasto ${eur(M.s)}, ganho ${eur(M.w)}.`+(s.n?` Sociedade com ${SET.partner||'parceiro(a)'}: ${eur(s.cost)} no total, eu ${eur(s.cost*s.mine)} e ${SET.partner||'parceiro(a)'} ${eur(s.cost*s.theirs)}.`:'');
+  CARD={k:null,blob,url:URL.createObjectURL(blob),name:`carteira-${ymd(now)}.png`,text};$('cardImg').src=CARD.url;$('cardModal').hidden=false;$('cardNote').textContent='';
+  let canShare=false;try{canShare=!!navigator.canShare&&navigator.canShare({files:[new File([blob],CARD.name,{type:'image/png'})]})}catch(e){}$('cardShare').hidden=!canShare}
+$('walletCard').addEventListener('click',openWalletCard);
 /* ---------- cartão da chave (imagem para partilhar) ---------- */
 let CARD=null;
 function cardText(k){const G=GAMES[k.g],d=k.d||nextDraw(k.g);return `${k.soc&&SET.partner?'A nossa chave':'A minha chave'} do ${G.label} para ${WD[fromYmd(d).getDay()].toLowerCase()} ${fmtD(d)}: ${k.n.join(' ')} + ${k.b.join(' ')}.${k.soc&&SET.partner?' Em sociedade com '+SET.partner+'.':''} Gerada na Máquina da Sorte.`}
@@ -1669,8 +1776,8 @@ $('cardModal').addEventListener('click',e=>{if(e.target.id==='cardModal')closeCa
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('cardModal').hidden)closeCard()});
 $('cardSave').addEventListener('click',async()=>{if(!CARD)return;const r=await saveBlob(CARD.blob,CARD.name);
   $('cardNote').textContent=r==='saved'?'Imagem guardada.':r==='declined'?'Não foi guardada.':'Aqui não dá para guardar. Mantém o dedo na imagem e escolhe guardar.'});
-$('cardShare').addEventListener('click',async()=>{if(!CARD)return;try{await navigator.share({files:[new File([CARD.blob],CARD.name,{type:'image/png'})],text:cardText(CARD.k)})}catch(e){}});
-$('cardCopy').addEventListener('click',()=>{if(!CARD)return;const t=cardText(CARD.k);try{navigator.clipboard.writeText(t).then(()=>{$('cardNote').textContent='Chave copiada.'},()=>{$('cardNote').textContent=t})}catch(e){$('cardNote').textContent=t}});
+$('cardShare').addEventListener('click',async()=>{if(!CARD)return;try{await navigator.share({files:[new File([CARD.blob],CARD.name,{type:'image/png'})],text:CARD.text||cardText(CARD.k)})}catch(e){}});
+$('cardCopy').addEventListener('click',()=>{if(!CARD)return;const t=CARD.text||cardText(CARD.k);try{navigator.clipboard.writeText(t).then(()=>{$('cardNote').textContent='Chave copiada.'},()=>{$('cardNote').textContent=t})}catch(e){$('cardNote').textContent=t}});
 
 /* ---------- Laboratório Einstein ---------- */
 const LAB={
@@ -1796,7 +1903,7 @@ document.addEventListener('click',e=>{
   const a=e.target.closest('a');
   if(a&&a.dataset.sec){e.preventDefault();$(a.dataset.sec).scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});return}
   if(a&&a.dataset.game){e.preventDefault();if(a.dataset.game!==S.game){S.game=a.dataset.game;S.now=[];drumBalls();renderAll();S.now=[makeKey(S.strat)];renderNow(false)}return}
-  if(a&&a.dataset.skinopen){e.preventDefault();renderSkins();$('skinModal').hidden=false;return}
+  if(a&&a.dataset.skinopen){e.preventDefault();openSettings();return}
   if(a&&a.dataset.install){e.preventDefault();doInstall();return}
   if(a&&a.dataset.cycle){e.preventDefault();const i=PERIODS.findIndex(p=>p[0]===S.period);S.period=PERIODS[(i+1)%PERIODS.length][0];renderAll();toast('Período: '+PERIODS.find(p=>p[0]===S.period)[1]);return}
   const t=e.target.closest('button');if(!t)return;
@@ -1808,6 +1915,7 @@ document.addEventListener('click',e=>{
   else if(t.dataset.show){const ns=t.dataset.show.split(',');$('boletim').scrollIntoView({behavior:'smooth',block:'start'});ns.forEach(n=>{const c=$('c-'+n);if(c){c.classList.remove('flash');void c.offsetWidth;c.classList.add('flash')}})}
   else if(t.id==='unlock'){S.locks[S.game].clear();renderArtists();renderSlip();renderPlayer()}
   else if(t.id==='play')generate();
+  else if(t.dataset.go){goSec(t.dataset.go)}
   else if(t.dataset.skin){applySkin(t.dataset.skin)}
   else if(t.id==='skinClose'){$('skinModal').hidden=true}
   else if(t.dataset.reg!=null){const k=S.now[+t.dataset.reg];if(k)registerKey(k,'gerada')}
@@ -1841,7 +1949,7 @@ $('bkFile').addEventListener('change',e=>{const f=e.target.files[0];if(f)importB
 $('resSel').addEventListener('change',e=>{S.resPick[S.game]=+e.target.value;renderResults()});
 $('progress').addEventListener('input',e=>{S.qty=+e.target.value;renderPlayer();save()});
 // secção ativa no menu
-const secIds=['descobrir','resultados','conferir','carteira','inteligente','laboratorio','tendencias','boletim','padroes','verdade','curiosidades'];
+const secIds=['jogar','descobrir','resultados','conferir','carteira','inteligente','laboratorio','tendencias','boletim','padroes','verdade','curiosidades'];
 const io=new IntersectionObserver(es=>{es.forEach(en=>{if(en.isIntersecting){document.querySelectorAll('#secNav .nav-item').forEach(li=>li.classList.toggle('active',li.firstElementChild.dataset.sec===en.target.id))}})},{rootMargin:'-35% 0px -60% 0px'});
 secIds.forEach(id=>io.observe($(id)));
 // tooltip

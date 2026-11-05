@@ -52,6 +52,9 @@ Se os Jogos Santa Casa mudarem a página, o robô escreve um aviso nos registos 
 - **Avisos**: notificação no telemóvel quando há prémio (com a app aberta) e, com a app **ntfy**, aviso do resultado mesmo com a app fechada.
 - **PIN**: bloqueia a app neste telemóvel (Carteira → Bloqueio com PIN).
 - **Aparência**: 4 temas de cor (Midnight, Rosa, Verde menta, Branco), no ícone da paleta no fundo do menu.
+- **Telemóvel**: barra de navegação em baixo (Jogar, Resultados, Conferir, Carteira, Mais) e a máquina logo no topo.
+- **Nome**: em Mais → Definições muda o nome (cada telemóvel tem o seu).
+- **Resumo da carteira e sociedade**: botão "Partilhar resumo" na Carteira.
 - **Instalar app**: ícone de transferir no fundo do menu (Android/Chrome). No iPhone: Safari → Partilhar → Adicionar ao ecrã principal.
 
 ## Só para ti
