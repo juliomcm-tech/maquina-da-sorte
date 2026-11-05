@@ -650,6 +650,50 @@ html[data-skin="branco"] .setname input,html[data-skin="branco"] .lockbox input{
 html[data-skin="branco"] .cardbox p{color:#5b5784;opacity:1}
 html[data-skin="branco"] .lockbox .err{color:#be185d}
 html[data-skin="branco"] .skin[aria-pressed="true"]{border-color:#7c6cf0}
+
+/* ===== "calma": como a referência — secções sem caixa a flutuar sobre o fundo, só o leitor em vidro ===== */
+html:root:root{--base:linear-gradient(180deg,#07071a 0%,#0d0b2a 32%,#1c1150 62%,#35167a 86%,#4c1d95 100%);
+  --glows:radial-gradient(520px 900px at -6% 78%,rgba(217,70,239,.55),transparent 65%),radial-gradient(900px 700px at 108% 108%,rgba(124,58,237,.75),transparent 62%),radial-gradient(700px 500px at 60% 120%,rgba(168,85,247,.45),transparent 70%),radial-gradient(600px 380px at 75% 30%,rgba(56,189,248,.06),transparent 70%)}
+html[data-skin="rosa"]:root:root{--base:linear-gradient(180deg,#0b0409 0%,#1a0714 32%,#3a0b2b 62%,#6b1240 86%,#9d174d 100%);
+  --glows:radial-gradient(520px 900px at -6% 78%,rgba(251,113,133,.5),transparent 65%),radial-gradient(900px 700px at 108% 108%,rgba(219,39,119,.7),transparent 62%),radial-gradient(700px 500px at 60% 120%,rgba(244,114,182,.4),transparent 70%)}
+html[data-skin="menta"]:root:root{--base:linear-gradient(180deg,#030b0a 0%,#051a17 32%,#073a33 62%,#0b5a4e 86%,#0f766e 100%);
+  --glows:radial-gradient(520px 900px at -6% 78%,rgba(163,230,53,.32),transparent 65%),radial-gradient(900px 700px at 108% 108%,rgba(20,184,166,.7),transparent 62%),radial-gradient(700px 500px at 60% 120%,rgba(52,211,153,.4),transparent 70%)}
+html[data-skin="branco"]:root:root{--base:linear-gradient(180deg,#fbfaff 0%,#f3f0ff 40%,#e9e3ff 75%,#ddd6fe 100%);
+  --glows:radial-gradient(520px 900px at -6% 78%,rgba(244,114,182,.35),transparent 65%),radial-gradient(900px 700px at 108% 108%,rgba(167,139,250,.55),transparent 62%),radial-gradient(700px 500px at 60% 120%,rgba(196,181,253,.5),transparent 70%)}
+body::after{background:var(--glows),var(--base)}
+main,html[data-skin] main{background:transparent!important;backdrop-filter:none;border:1px solid rgba(255,255,255,.26);box-shadow:none}
+html[data-skin="branco"] main{border-color:rgba(30,27,75,.16)}
+.main-menu,.right-content{border-color:rgba(255,255,255,.20)}
+html[data-skin="branco"] .main-menu,html[data-skin="branco"] .right-content{border-color:rgba(30,27,75,.12)}
+/* secções sem caixa */
+.panel,html[data-skin] .panel{background:transparent!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;padding:0!important;border-radius:0}
+.left-content{gap:46px}
+.subblock{border-top-color:rgba(255,255,255,.12)}
+/* mini-cartões: vidro leve e calmo */
+.cmp > div,.mod,.ev > div,.verdict,.li,.note{background:rgba(255,255,255,.055)!important;border:1px solid rgba(255,255,255,.14)!important;box-shadow:none!important;border-radius:18px}
+.cmp .me{background:rgba(var(--trgb),.32)!important;border-color:rgba(255,255,255,.28)!important}
+html[data-skin="branco"] .cmp > div,html[data-skin="branco"] .mod,html[data-skin="branco"] .ev > div,html[data-skin="branco"] .verdict,html[data-skin="branco"] .li,html[data-skin="branco"] .note{background:rgba(255,255,255,.6)!important;border-color:rgba(30,27,75,.08)!important}
+html[data-skin="branco"] .cmp .me{background:linear-gradient(135deg,#8b7cf6,#a855f7)!important;color:#fff}
+/* o leitor: a única janela de vidro, lilás translúcido e calmo */
+.music-player,html[data-skin] .music-player{background:rgba(var(--trgb),.26)!important;border:1px solid rgba(255,255,255,.30)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.12)!important;
+  backdrop-filter:blur(16px)!important;-webkit-backdrop-filter:blur(16px)!important;border-radius:26px}
+html[data-skin="branco"] .music-player{background:linear-gradient(180deg,rgba(139,124,246,.9),rgba(168,85,247,.82))!important}
+.controls button{box-shadow:none}
+.controls .play-pause-btn{box-shadow:0 6px 20px rgba(var(--trgb),.35)}
+/* imagens com borda fina de luz e sombra suave */
+.swiper-slide{border:1px solid rgba(255,255,255,.32);box-shadow:0 20px 50px rgba(0,0,0,.45)}
+.album-frame{border:1px solid rgba(255,255,255,.32);box-shadow:0 12px 34px rgba(0,0,0,.35)}
+.song-img{border:1px solid rgba(255,255,255,.28)}
+/* inputs e botões secundários mais leves */
+select.sel,form.manual input{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18)}
+html[data-skin="branco"] select.sel,html[data-skin="branco"] form.manual input{background:rgba(255,255,255,.85);border-color:rgba(30,27,75,.14)}
+.btn{background:rgba(255,255,255,.05)}
+html[data-skin="branco"] .btn{background:rgba(255,255,255,.85)}
+.tbl th,.tbl td{border-bottom-color:rgba(255,255,255,.10)}
+html[data-skin="branco"] .tbl th,html[data-skin="branco"] .tbl td{border-bottom-color:rgba(30,27,75,.08)}
+@media (max-width:640px){.left-content{gap:36px}.music-player{padding:18px 14px}}
+
+@media (min-width:1181px){.right-content .music-player{position:sticky;top:16px}}
 </style>
 </head>
 <body>
